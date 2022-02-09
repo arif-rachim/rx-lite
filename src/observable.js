@@ -1,6 +1,8 @@
+function noOp(){
+}
 export function createObservable(initializer) {
-    const observers = [];
-
+    let observers = [];
+    initializer = initializer || noOp;
     function join(observer) {
         observers.push(observer);
         return function detach() {
@@ -21,8 +23,9 @@ export function createObservable(initializer) {
         observers.forEach(observer => observer.error(err));
     }
 
-    function complete(err) {
+    function complete() {
         observers.forEach(observer => observer.complete());
+        observers = [];
     }
 
     function pipe(...operators) {
@@ -67,9 +70,7 @@ export function map(mapCallback) {
         return function message(message) {
             try {
                 const nextVal = mapCallback(message);
-                setTimeout(() => {
-                    next(nextVal);
-                }, 100);
+                next(nextVal);
             } catch (err) {
                 error(err);
             }

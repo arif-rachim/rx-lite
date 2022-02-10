@@ -1,8 +1,8 @@
-function noOp(){
-}
-export function createObservable(initializer) {
+export default function createObservable(initializer) {
     let observers = [];
-    initializer = initializer || noOp;
+    initializer = initializer || (() => (() => {
+    }));
+
     function join(observer) {
         observers.push(observer);
         return function detach() {
@@ -10,9 +10,23 @@ export function createObservable(initializer) {
         }
     }
 
-    function subscribe({next, error, complete}) {
-        initializer({next, error, complete});
-        return join({next, error, complete})
+    function subscribe(onNext,onComplete,onError) {
+        const {next,complete,error} = typeof onNext === 'object' ? onNext : {next:onNext,error:onError,complete:onComplete};
+        const disposeCallback = initializer({next,complete,error});
+        const exitCallback = join({
+            next, error, complete: function completeCallback() {
+                if (disposeCallback && typeof disposeCallback === 'function') {
+                    disposeCallback();
+                }
+                complete();
+            }
+        });
+        return function unsubscribe() {
+            if (disposeCallback && typeof disposeCallback === 'function') {
+                disposeCallback();
+            }
+            exitCallback();
+        }
     }
 
     function next(message) {
@@ -32,7 +46,11 @@ export function createObservable(initializer) {
         const pipedObserver = operators.reduce((observable, operator) => {
             const nextObservable = createObservable();
             const next = operator(nextObservable);
-            observable.join({next: next, error: nextObservable.error, complete: nextObservable.complete});
+            function complete(){
+                exit();
+                nextObservable.complete();
+            }
+            const exit = observable.join({next: next, error: nextObservable.error, complete});
             return nextObservable;
         }, self);
 
@@ -63,17 +81,4 @@ export function createObservable(initializer) {
         initializer
     }
     return self;
-}
-
-export function map(mapCallback) {
-    return function observer({next, error, complete}) {
-        return function message(message) {
-            try {
-                const nextVal = mapCallback(message);
-                next(nextVal);
-            } catch (err) {
-                error(err);
-            }
-        }
-    }
 }

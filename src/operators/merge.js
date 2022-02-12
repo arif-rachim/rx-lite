@@ -7,15 +7,15 @@ import createObservable from "../observable";
  */
 export default function merge(...observables){
     let activeObserver = observables.length;
-    return createObservable(function mergeInitializer({next:mergeNext,error:mergeError,complete:mergeComplete}){
+    return createObservable(function initMerge({next:mergeNext,error:mergeError,complete:mergeComplete}){
         observables.forEach(function onEach(observable){
-            function complete(){
+            function onEachComplete(){
                 activeObserver = activeObserver - 1;
                 if(activeObserver === 0){
                     mergeComplete();
                 }
             }
-            observable.subscribe(mergeNext,mergeError,complete);
+            observable.subscribe(mergeNext,mergeError,onEachComplete);
         })
     })
 }

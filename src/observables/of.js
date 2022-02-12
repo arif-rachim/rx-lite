@@ -6,7 +6,7 @@ import createObservable from "../observable";
  * @returns {{next: next, subscribe: function({next: *, error: *, complete: *}): function(): void, pipe: function(...[*]): *, join: function(*=): function(): void, error: error, complete: complete, observers: [], initializer: function(): function()}}
  */
 export default function of(...params){
-    return createObservable(function ofInitializer({next,complete}){
+    return createObservable(function initOf({next,complete}){
         params.forEach(param => next(param));
         complete();
     })

@@ -1,7 +1,11 @@
+function noOp() {
+    return function noOp() {
+    };
+}
+
 export default function createObservable(initializer) {
     let observers = [];
-    initializer = initializer || (() => (() => {
-    }));
+    initializer = initializer || noOp;
 
     function join(observer) {
         observers.push(observer);
@@ -10,9 +14,13 @@ export default function createObservable(initializer) {
         }
     }
 
-    function subscribe(onNext,onError,onComplete) {
-        const {next,complete,error} = typeof onNext === 'object' ? onNext : {next:onNext,error:onError,complete:onComplete};
-        const disposeCallback = initializer({next,complete,error});
+    function subscribe(onNext, onError, onComplete) {
+        const {next, complete, error} = typeof onNext === 'object' ? onNext : {
+            next: onNext,
+            error: onError,
+            complete: onComplete
+        };
+        const disposeCallback = initializer({next, complete, error});
         const exitCallback = join({
             next, error, complete: function completeCallback() {
                 if (disposeCallback && typeof disposeCallback === 'function') {
@@ -43,20 +51,23 @@ export default function createObservable(initializer) {
     }
 
     function pipe(...operators) {
-        const pipedObserver = operators.reduce((observable, operator) => {
+        const pipedObserver = operators.reduce(function reduceCallback(observable, operator){
+
             const nextObservable = createObservable();
             const next = operator(nextObservable);
-            function complete(){
+
+            function complete() {
                 exit();
                 nextObservable.complete();
             }
+
             const exit = observable.join({next: next, error: nextObservable.error, complete});
             return nextObservable;
         }, self);
 
         pipedObserver.subscribe = function subscribe({next, error, complete}) {
             const init = createObservable();
-            const final = operators.reduce((observable, operator) => {
+            const final = operators.reduce(function reduceCallback(observable, operator) {
                 const nextObservable = createObservable();
                 const next = operator(nextObservable);
                 observable.join({next: next, error: nextObservable.error, complete: nextObservable.complete});
@@ -64,7 +75,7 @@ export default function createObservable(initializer) {
             }, init);
             final.join({next, error, complete});
 
-            self.initializer.call(self,init)
+            self.initializer.call(self, init)
             return pipedObserver.join({next, error, complete})
         }
 

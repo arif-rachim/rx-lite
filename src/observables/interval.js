@@ -7,7 +7,7 @@ import createObservable from "../observable";
  * @returns {{next: next, subscribe: function({next: *, error: *, complete: *}): function(): void, pipe: function(...[*]): *, join: function(*=): function(): void, error: error, complete: complete, observers: [], initializer: function(): function()}}
  */
 export default function interval(delayMilliSeconds){
-    return createObservable(function intervalInitializer({next}){
+    return createObservable(function initInterval({next}){
         let index = 0;
         const intervalTimeout = setInterval(function intervalHandler(){
             next(++index);

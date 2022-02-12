@@ -3,8 +3,6 @@ import empty from "./empty";
 
 describe("empty", () => {
     test("it should immediately complete", (done) => {
-
-
         const result = [];
         empty().subscribe(value => {
             if(value){

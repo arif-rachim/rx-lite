@@ -16,7 +16,7 @@ describe("defer", () => {
                 }
             },
             complete: () => {
-                expect(Array.from({length: 5}).map((v, i) => i + 1).join(' ')).toEqual(result.join(" "));
+                expect(Array.from({length: max}).map((v, i) => i + 1).join(' ')).toEqual(result.join(" "));
                 done();
             }
         });

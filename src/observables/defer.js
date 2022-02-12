@@ -2,7 +2,7 @@ import createObservable from "../observable";
 
 /**
  * Create an observable with given subscription function.
- *
+ *💡 defer is used as part of the iif operator!
  * @param initializeCallback
  * @returns {{next: next, subscribe: function(*=, *=, *=): function(): void, pipe: function(...[*]): *, join: function(*=): function(): void, error: error, complete: complete, observers: [], initializer: function(): function()}}
  */

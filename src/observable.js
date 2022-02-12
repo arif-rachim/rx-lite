@@ -3,10 +3,20 @@ function noOp() {
     };
 }
 
+/**
+ * Create observer
+ * @param {function({next:function,error:function,complete:function}):function():void} initializer
+ * @returns {{next: next, subscribe: function((Function|{next: Function, error: Function, complete: Function}), Function, Function): function(): void, pipe: function(...[*]): *, join: function({next: Function, error: Function, complete: Function}): function(): void, error: error, complete: complete, observers: [], initializer: function(): function()}}
+ */
 export default function createObservable(initializer) {
     let observers = [];
     initializer = initializer || noOp;
 
+    /**
+     *
+     * @param {{next:function,error:function,complete:function}} observer
+     * @returns {function(): void}
+     */
     function join(observer) {
         observers.push(observer);
         return function detach() {
@@ -14,6 +24,13 @@ export default function createObservable(initializer) {
         }
     }
 
+    /**
+     *
+     * @param {function|{next:function,error:function,complete:function}} onNext
+     * @param {function} onError
+     * @param {function} onComplete
+     * @returns {function(): void} unregister the subscriber
+     */
     function subscribe(onNext, onError, onComplete) {
         const {next, complete, error} = typeof onNext === 'object' ? onNext : {
             next: onNext,
@@ -37,19 +54,36 @@ export default function createObservable(initializer) {
         }
     }
 
+    /**
+     * Broadcast message to all observers
+     * @param message
+     */
     function next(message) {
         observers.forEach(observer => observer.next(message));
     }
 
+    /**
+     * Broadcast error to all observers
+     * @param err
+     */
     function error(err) {
         observers.forEach(observer => observer.error(err));
     }
 
+    /**
+     * Broadcast complete to all observer
+     * remove all observers
+     */
     function complete() {
         observers.forEach(observer => observer.complete());
         observers = [];
     }
 
+    /**
+     * Pipe against operators
+     * @param operators
+     * @returns {*}
+     */
     function pipe(...operators) {
         const pipedObserver = operators.reduce(function reduceCallback(observable, operator){
 

@@ -10,7 +10,7 @@ export default function createObservable(initializer) {
         }
     }
 
-    function subscribe(onNext,onComplete,onError) {
+    function subscribe(onNext,onError,onComplete) {
         const {next,complete,error} = typeof onNext === 'object' ? onNext : {next:onNext,error:onError,complete:onComplete};
         const disposeCallback = initializer({next,complete,error});
         const exitCallback = join({
@@ -63,7 +63,8 @@ export default function createObservable(initializer) {
                 return nextObservable;
             }, init);
             final.join({next, error, complete});
-            self.initializer(init);
+
+            self.initializer.call(self,init)
             return pipedObserver.join({next, error, complete})
         }
 

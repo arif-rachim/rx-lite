@@ -1,7 +1,8 @@
-import {createObservable, map} from "./observable.js";
+import createObservable from "./observable.js";
+import map from "./operators/map";
 
 window.onload = () => {
-    const origin = createObservable(({next,error,complete}) => {
+    const origin = createObservable(({next,complete}) => {
         console.log('Running initializer');
         next(3);
         complete();

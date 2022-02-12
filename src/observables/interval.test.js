@@ -1,8 +1,7 @@
 import {describe, test} from "@jest/globals";
-import of from "./of";
 import interval from "./interval";
 
-describe("of", () => {
+describe("interval", () => {
     test("it should Emitting a sequence of numbers", (done) => {
         const source = interval(100);
         const max = 5;
@@ -11,7 +10,7 @@ describe("of", () => {
             next: (val) => {
                 result.push(val);
                 if (val === max) {
-                    source.complete();
+                    source.complete.call();
                 }
             },
             complete: () => {
